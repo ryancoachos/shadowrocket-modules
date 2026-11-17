@@ -1,22 +1,27 @@
 #!name=YouTube Enhance Pro
-#!desc=Mở khóa PiP, phát nền, chặn quảng cáo (Self-host)
+#!desc=Hỗ trợ PiP, phát nền, chặn quảng cáo (Self-host 2026)
 #!system=ios
 
 [Rule]
+RULE-SET,https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hostsVN-surge-rule.conf,REJECT
+RULE-SET,https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hostsVN-surge-exceptions-rule.conf,DIRECT
 DOMAIN-SUFFIX,googlevideo.com,DIRECT
 DOMAIN-SUFFIX,youtubei.googleapis.com,DIRECT
+# Chặn giao thức QUIC (UDP 443) của YouTube để ép app chạy qua HTTPS/TCP cho MITM giải mã được
+AND,((DOMAIN-SUFFIX,googlevideo.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN-SUFFIX,youtubei.googleapis.com),(PROTOCOL,UDP)),REJECT
 
 [URL Rewrite]
-^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&oad - reject-img
-^https?:\/\/.+\.googlevideo\.com\/ptracking\?pltype=adhost - reject-200
-^https?:\/\/.+\.youtube\.com\/api\/stats\/.+adformat - reject-200
-^https?:\/\/m\.youtube\.com\/_get_ads - reject-200
-^https?:\/\/pagead2\.googlesyndication\.com\/pagead\/ - reject-200
-^https?:\/\/s\.youtube\.com\/api\/stats\/watchtime\?adformat - reject-200
-^https?:\/\/youtubei\.googleapis\.com\/.+ad_break - reject-200
+^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&oad - reject
+^https?:\/\/.+\.googlevideo\.com\/ptracking\?pltype=adhost - reject
+^https?:\/\/.+\.youtube\.com\/api\/stats\/.+adformat - reject
+^https?:\/\/m\.youtube\.com\/_get_ads - reject
+^https?:\/\/pagead2\.googlesyndication\.com\/pagead\/ - reject
+^https?:\/\/s\.youtube\.com\/api\/stats\/watchtime\?adformat - reject
+^https?:\/\/youtubei\.googleapis\.com\/.+ad_break - reject
 
 [Script]
-youtube-response = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|config|log_event),requires-body=1,max-size=0,binary-body-mode=1,script-path=https://raw.githubusercontent.com/ryancoachos/shadowrocket-modules/main/youtube-response.js,argument={"captionLang":"off","blockUpload":true,"blockImmersive":true,"blockShorts":false}
+youtube-response = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|config|log_event),requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/ryancoachos/shadowrocket-modules/main/youtube-response.js,argument={"captionLang":"off","blockUpload":true,"blockImmersive":true,"blockShorts":false}
 
 [MITM]
 hostname = %APPEND% *.googlevideo.com, youtubei.googleapis.com, *.youtube.com
